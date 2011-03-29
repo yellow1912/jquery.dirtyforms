@@ -12,9 +12,9 @@ Existing solutions were not flexible enough, so I wrote this to make sure that a
 
 The .live() method is used to attach click and submit handlers so even elements that are introduced to the page after the page has loaded, e.g. loaded dynamically through AJAX, will be handled correctly, and a 'form stash' was created to capture and save event targets at the beginning of the event / decision stage so that elements that are no longer in the DOM can still have events fired on them (e.g. when a form is in a modal box, then the modal box is replaced by the Dirty Forms confirmation, the form will be stashed, and if the event is refired, it will be added back to the DOM then have the event triggered on it). 
 
-Status
+Todo
 ---------------------------------
-Feature complete, browser tested - about to go into a production environment for more testing.
+Plugin methods are taking namespaces in fn -> resolve this
 
 Usage
 ---------------------------------
@@ -67,6 +67,9 @@ $.fn.isDirty() will return true if the provided element is considered dirty
 
 $.fn.setDirty() will set the provided element as dirty
 	$('form#accountform').setDirty();
+	
+$.fn.resetDirty() will reset the provided element as not dirty
+	$('form#accountform').resetDirty();
 
 Helpers
 ---------------------------------
