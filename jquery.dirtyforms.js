@@ -1,5 +1,3 @@
-// Copyright 2010 Mal Curtis
-
 if (typeof jQuery == 'undefined') throw("jQuery Required");
 
 (function($){
@@ -12,32 +10,34 @@ if (typeof jQuery == 'undefined') throw("jQuery Required");
 			dirtyClass : 'dirty',
 			listeningClass : 'dirtylisten',
 			ignoreClass : 'ignoredirty',
+			fields: 'input:hidden, input:text, input:password, input:checkbox, input:radio, textarea, select',
 			helpers : [],
 			dialog : {
+				open: function(content){
+					$.blockUI({ message: content, css: { width: '275px' } }); 
+				},
+				close: function (){
+					$.unblockUI();
+				},
 				refire : function(content, ev){
-					$.facebox(content);
+					this.open(content);
 				},
 				fire : function(message, title){
-					var content = '<h1>' + title + '</h1><p>' + message + '</p><p><a href="#" class="ignoredirty button medium red continue">Continue</a><a href="#" class="ignoredirty button medium cancel">Stop</a>';
-					$.facebox(content);
+					var content = '<h1>' + title + '</h1><p>' + message + '</p><p><a href="#" class="ignoredirty button medium red continue">Leave</a><a href="#" class="ignoredirty button medium cancel">Stay</a>';
+					this.open(content);
 				},
 				bind : function(){
-					$('#facebox .cancel, #facebox .close, #facebox_overlay').click(decidingCancel);
-					$('#facebox .continue').click(decidingContinue);
+					var self = this; 
+					$('.ignoredirty.cancel').click(decidingCancel);
+					$('.ignoredirty.continue').click(decidingContinue);
 					$(document).bind('decidingcancelled.dirtyforms', function(){
-					 	// Hacky way of manually removing the fuck out of Facebox
-						$("#facebox").remove();
-					 	$('#facebox_overlay').remove();
-					 	$.facebox.settings.inited = false;
+					 	self.close();
 					});
 				},
 				stash : function(){
-					var fb = $('#facebox');
-					return ($.trim(fb.html()) == '' || fb.css('display') != 'block') ?
-					   false :
-					   $('#facebox .content').clone(true);
+					return !$('.blockPage:first').is('*') ? false : $('.blockPage:first').clone(true);
 				},
-				selector : '#facebox .content'
+				selector : '.blockPage:first'
 			},
 
 			isDirty : function(){
@@ -88,7 +88,7 @@ if (typeof jQuery == 'undefined') throw("jQuery Required");
 		return this.each(function(e){
 			dirtylog('Adding form ' + $(this).attr('id') + ' to forms to watch');
 			$(this).addClass(core.listeningClass);
-			$('input:text, input:password, input:checkbox, input:radio, textarea, select', this).change(function(){
+			$(core.fields, this).change(function(){
 				$(this).setDirty();
 			});
 		});
@@ -100,7 +100,14 @@ if (typeof jQuery == 'undefined') throw("jQuery Required");
 			$(this).addClass($.DirtyForms.dirtyClass).parents('form').addClass($.DirtyForms.dirtyClass);
 		});
 	}
-
+	
+	$.fn.resetDirty = function(){
+		dirtylog('resetDirty called');
+		return this.each(function(e){
+			$(this).removeClass($.DirtyForms.dirtyClass).parents('form').removeClass($.DirtyForms.dirtyClass);
+		});
+	}
+	
 	// Returns true if any of the supplied elements are dirty
 	$.fn.isDirty = function(){
 		var isDirty = false;
